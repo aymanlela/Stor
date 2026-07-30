@@ -230,7 +230,7 @@
                     <option value="المنيا" data-shipping="60">المنيا (60 ج.م)</option>
                     <option value="أسيوط" data-shipping="60">أسيوط (60 ج.م)</option>
                     <option value="بني سويف" data-shipping="55">بني سويف (55 ج.م)</option>
-                    <option value="الفيوم" data-shipping="55">الفيوم (55 ج.м)</option>
+                    <option value="الفيوم" data-shipping="55">الفيوم (55 ج.م)</option>
                     <option value="البحر الأحمر" data-shipping="65">البحر الأحمر (65 ج.م)</option>
                 </select>
 
@@ -445,7 +445,6 @@
             const shipping = parseInt(shippingCost.textContent);
             const finalTotal = totalPrice + shipping;
 
-            // تجهيز النص بالكامل
             let msg = `🛍️ **طلب جديد من Little Library** 💖\n\n`;
             msg += `👤 **الاسم:** ${fullName}\n`;
             msg += `📞 **التليفون:** ${phone}\n`;
@@ -461,8 +460,9 @@
             try {
                 // تجهيز البيانات للإرسال (نص + صورة)
                 const formData = new FormData();
-                formData.append('textMessage', msg); // إرسال النص كـ String عادي
-                formData.append('photo', receiptFile); // إرسال الصورة
+                // التغيير السحري: تشفير النص قبل البعث
+                formData.append('textMessage', encodeURIComponent(msg));
+                formData.append('photo', receiptFile);
 
                 const response = await fetch('/api/send-order', {
                     method: 'POST',
