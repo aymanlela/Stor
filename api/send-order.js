@@ -56,38 +56,26 @@ export default async function handler(req, res) {
       }
     });
 
-    // إرسال ألبوم صور المنتجات (مضمون 100%)
+    // 1. إرسال ألبوم الصور (استخدام الروابط المباشرة - أسرع طريقة)
     if (productImagesLinks && productImagesLinks.length > 0) {
-      const mediaGroup = [];
-      for (let i = 0; i < productImagesLinks.length; i++) {
-        try {
-          const res = await fetch(productImagesLinks[i]);
-          if (res.ok) {
-            const buffer = await res.arrayBuffer();
-            mediaGroup.push({
-              type: 'photo',
-              media: { source: Buffer.from(buffer), filename: `product_${i}.jpg` },
-              caption: i === 0 ? `🖼️ ألبوم صور المنتجات (${productImagesLinks.length})` : ''
-            });
-          }
-        } catch (e) {
-          console.log("فشل تحميل صورة:", productImagesLinks[i]);
-        }
-      }
+      const mediaGroup = productImagesLinks.map((url, index) => ({
+        type: 'photo',
+        media: url,
+        caption: index === 0 ? `🖼️ صور منتجات الطلب (${productImagesLinks.length})` : ''
+      }));
 
-      if (mediaGroup.length > 0) {
-        const formData = new FormData();
-        formData.append('chat_id', CHAT_ID);
-        mediaGroup.forEach((item) => {
-          formData.append('media', JSON.stringify(item));
-        });
-        
-        const albumUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMediaGroup`;
-        await fetch(albumUrl, { method: 'POST', body: formData });
-      }
+      const albumUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMediaGroup`;
+      await fetch(albumUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          media: mediaGroup
+        })
+      });
     }
 
-    // إرسال التفاصيل
+    // 2. إرسال التفاصيل
     if (textMessage) {
       const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
       await fetch(textUrl, {
@@ -101,7 +89,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // إرسال صورة الإيصال
+    // 3. إرسال صورة الإيصال
     if (receiptFileBuffer) {
       const formData = new FormData();
       const blob = new Blob([receiptFileBuffer], { type: 'image/jpeg' });
