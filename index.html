@@ -222,7 +222,7 @@
                     <option value="شمال سيناء" data-shipping="60">شمال سيناء (60 ج.م)</option>
                     <option value="جنوب سيناء" data-shipping="60">جنوب سيناء (60 ج.م)</option>
                     <option value="مطروح" data-shipping="60">مطروح (60 ج.م)</option>
-                    <option value="الوادي الجديد" data-shipping="65">الوادي الجديد (65 ج.м)</option>
+                    <option value="الوادي الجديد" data-shipping="65">الوادي الجديد (65 ج.م)</option>
                     <option value="قنا" data-shipping="65">قنا (65 ج.م)</option>
                     <option value="سوهاج" data-shipping="65">سوهاج (65 ج.م)</option>
                     <option value="الأقصر" data-shipping="65">الأقصر (65 ج.م)</option>
@@ -230,7 +230,7 @@
                     <option value="المنيا" data-shipping="60">المنيا (60 ج.م)</option>
                     <option value="أسيوط" data-shipping="60">أسيوط (60 ج.م)</option>
                     <option value="بني سويف" data-shipping="55">بني سويف (55 ج.م)</option>
-                    <option value="الفيوم" data-shipping="55">الفيوم (55 ج.م)</option>
+                    <option value="الفيوم" data-shipping="55">الفيوم (55 ج.м)</option>
                     <option value="البحر الأحمر" data-shipping="65">البحر الأحمر (65 ج.م)</option>
                 </select>
 
@@ -240,14 +240,12 @@
 
                 <div style="text-align: center; margin-top: 10px;">
                     <p style="font-size: 0.9rem; color: var(--gray);">💳 يمكنك الدفع عبر فودافون كاش:</p>
-                    <!-- ⚠️ غير اسم الصورة ورقم المحفظة هنا -->
                     <img src="vodafone-cash.jpg" alt="أرقام فودافون كاش" style="width: 100%; max-width: 200px; border-radius: 10px; margin: 10px auto; display: block; border: 1px solid #ddd;">
                     <p style="font-weight: bold; color: var(--brand-brown);">رقم المحفظة: <span style="color: var(--brand-pink);">01012345678</span></p> 
                 </div>
                 
                 <input type="text" id="senderNumber" placeholder="رقم أو حساب المرسل *" required>
 
-                <!-- خلية رفع الصورة رجعت عشان العميل يرفع إيصال الدفع -->
                 <div class="upload-box" onclick="document.getElementById('receiptUpload').click()">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <label style="cursor: pointer; color: var(--brand-brown); font-weight: 600;">اضغط لرفع صورة التحويل (إلزامي)</label>
@@ -287,12 +285,7 @@
         const SHEET_ID = '1B9EnRkQt-C0cjSiKasBR8KN47UPpoEhaANAU-EJiHfc';
         const TAB_NAME = 'Sheet1';
         const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${TAB_NAME}`;
-        
-        // (تم حذف التوكن من هنا تماماً، أصبح آمن)
 
-        // =====================================================
-        //  CART LOGIC
-        // =====================================================
         let cart = [];
         let productImagesMap = {}; 
 
@@ -413,7 +406,7 @@
         function closeCartSidebar() { cartSidebar.classList.remove('open'); cartOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 
         // =====================================================
-        //  TELEGRAM SUBMIT (الفرق هنا: بيبعث للسيرفر الوسيط بتاعي)
+        //  TELEGRAM SUBMIT (الحل الجذري)
         // =====================================================
         orderForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -443,21 +436,16 @@
 
             let productList = '';
             let totalPrice = 0;
-            let firstProductImage = ''; 
-
-            cart.forEach((item, index) => {
+            cart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 totalPrice += itemTotal;
                 productList += `📦 ${item.name} (x${item.quantity}) - ${item.color || 'بدون خيار'} = ${itemTotal} ج.م\n`;
-                
-                if(index === 0 && productImagesMap[item.name]) {
-                    firstProductImage = productImagesMap[item.name];
-                }
             });
 
             const shipping = parseInt(shippingCost.textContent);
             const finalTotal = totalPrice + shipping;
 
+            // تجهيز النص بالكامل
             let msg = `🛍️ **طلب جديد من Little Library** 💖\n\n`;
             msg += `👤 **الاسم:** ${fullName}\n`;
             msg += `📞 **التليفون:** ${phone}\n`;
@@ -471,19 +459,11 @@
             msg += `💳 **رقم المرسل:** ${senderNumber}`;
 
             try {
-                // 1. تجهيز البيانات للإرسال للسيرفر الوسيط
+                // تجهيز البيانات للإرسال (نص + صورة)
                 const formData = new FormData();
-                formData.append('message', msg); // النص
-                formData.append('photo', receiptFile); // صورة الإيصال
+                formData.append('textMessage', msg); // إرسال النص كـ String عادي
+                formData.append('photo', receiptFile); // إرسال الصورة
 
-                // لو عايز نبعت صورة المنتج برضه للسيرفر (اختياري)
-                if (firstProductImage) {
-                     formData.append('productImageUrl', firstProductImage);
-                }
-
-                // ==============================================
-                // ✅ التغيير الأهم: بعت البيانات للسيرفر الوسيط بتاعي مش لـ Telegram
-                // ==============================================
                 const response = await fetch('/api/send-order', {
                     method: 'POST',
                     body: formData
