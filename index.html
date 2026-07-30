@@ -178,11 +178,10 @@
         <div class="container" id="accessories">
             <div class="category-header"><h3>أدوات و <span>ملحقات</span></h3><p>أقلام، استيكي نوت، وكل حاجة تكمل يومك الدراسي.</p></div>
             
-            <!-- ======== الفلتر الجديد (هيتولد أوتوماتيك من الجدول) ======== -->
+            <!-- الفلتر -->
             <div id="filter-container" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                 <button class="filter-btn active" data-filter="all" style="background: var(--brand-pink); color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold;">All</button>
             </div>
-            <!-- ================================ -->
             
             <div class="products-grid" id="accessories-grid"></div>
         </div>
@@ -500,7 +499,7 @@
         });
 
         // =====================================================
-        //  LOAD PRODUCTS & FILTERS
+        //  LOAD PRODUCTS & FILTERS (مع تسريع الصور)
         // =====================================================
         async function loadProducts() {
             document.querySelectorAll('.products-grid').forEach(grid => {
@@ -517,7 +516,7 @@
                     name: row.name || '',
                     price: row.price || '0',
                     category: row.category || '',
-                    sub_category: row.sub_category || '', // العامود للفلتر
+                    sub_category: row.sub_category || '',
                     imgs: row.imgs || '', 
                     color: row.color || '',
                     description: row.description || '',
@@ -530,7 +529,6 @@
 
                 renderProducts('study-boxes-grid', products.filter(p => p.category === 'study-boxes'));
                 
-                // تخزين الأدوات
                 allAccessories = products.filter(p => p.category === 'accessories');
                 setupFilters(allAccessories);
                 renderProducts('accessories-grid', allAccessories);
@@ -543,9 +541,7 @@
             }
         }
 
-        // === دالة إعداد الفلاتر (ديناميكية 100%) ===
         function setupFilters(products) {
-            // استخراج التصنيفات الفرعية الفريدة من الجدول
             let subCategories = ['All'];
             products.forEach(p => {
                 if (p.sub_category && !subCategories.includes(p.sub_category)) {
@@ -553,15 +549,13 @@
                 }
             });
 
-            // إنشاء الأزرار
             filterContainer.innerHTML = '';
             subCategories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-btn';
                 btn.dataset.filter = cat;
-                btn.textContent = cat; // هياخد الاسم المكتوب في الجدول (Pens, Notes...)
+                btn.textContent = cat;
                 
-                // ستايل الأزرار
                 btn.style.cssText = `
                     background: var(--white);
                     color: var(--brand-brown);
@@ -573,7 +567,6 @@
                     transition: 0.3s;
                     font-size: 0.95rem;
                 `;
-                // ستايل الزر النشط
                 if (cat === 'All') {
                     btn.classList.add('active');
                     btn.style.background = 'var(--brand-pink)';
@@ -581,16 +574,13 @@
                 }
 
                 btn.addEventListener('click', function() {
-                    // إزالة النشاط من كل الأزرار
                     document.querySelectorAll('.filter-btn').forEach(b => {
                         b.style.background = 'var(--white)';
                         b.style.color = 'var(--brand-brown)';
                     });
-                    // تفعيل الزر المضغوط
                     this.style.background = 'var(--brand-pink)';
                     this.style.color = 'white';
 
-                    // تصفية المنتجات
                     const filterValue = this.dataset.filter;
                     let filteredProducts = allAccessories;
                     if (filterValue !== 'All') {
@@ -602,7 +592,7 @@
             });
         }
 
-        function renderProducts(gridId, products) {
+        async function renderProducts(gridId, products) {
             const grid = document.getElementById(gridId);
             if (!grid) return;
             if (products.length === 0) {
@@ -611,10 +601,30 @@
             }
 
             let html = '';
-            products.forEach(p => {
+            for (const p of products) {
                 
                 let imageSrc = p.imgs || '';
-                
+
+                // ==========================================
+                //  🔥 التعديل السحري لجلب الصور بسرعة
+                // ==========================================
+                if (imageSrc && (imageSrc.startsWith('http://') || imageSrc.startsWith('https://'))) {
+                    try {
+                        const response = await fetch(imageSrc);
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            imageSrc = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            });
+                        }
+                    } catch (e) {
+                        // لو فشل التحميل، هنخلي الأيقونة تظهر
+                        imageSrc = '';
+                    }
+                }
+
                 let colorHtml = '';
                 if (p.color && p.color.trim() !== '') {
                     const colors = p.color.split(',').map(c => c.trim());
@@ -645,7 +655,7 @@
                         </button>
                     </div>
                 `;
-            });
+            }
             grid.innerHTML = html;
             attachCartEvents();
         }
