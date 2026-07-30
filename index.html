@@ -416,7 +416,7 @@
         function closeCartSidebar() { cartSidebar.classList.remove('open'); cartOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 
         // =====================================================
-        //  TELEGRAM SUBMIT (مع إرسال روابط صور المنتجات)
+        //  TELEGRAM SUBMIT (النسخة الآمنة والذكية)
         // =====================================================
         orderForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -444,46 +444,35 @@
                 return;
             }
 
-            let productList = '';
-            let totalPrice = 0;
+            // 1. تجهيز بيانات العميل
+            const customerData = {
+                fullName, phone, governorate, email, address, altPhone, senderNumber,
+                shipping: shippingCost.textContent
+            };
+
+            // 2. تجهيز منتجات السلة (مع الكمية واللون)
+            const cartItems = cart.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                color: item.color || ''
+            }));
+
+            // 3. تجهيز روابط صور المنتجات
+            let productImagesLinks = [];
             cart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
-                totalPrice += itemTotal;
-                productList += `📦 ${item.name} (x${item.quantity}) - ${item.color || 'بدون خيار'} = ${itemTotal} ج.م\n`;
+                if (productImagesMap[item.name]) {
+                    let imgLink = productImagesMap[item.name];
+                    if (!imgLink.startsWith('http')) {
+                        imgLink = window.location.origin + '/' + imgLink;
+                    }
+                    productImagesLinks.push(imgLink);
+                }
             });
 
-            const shipping = parseInt(shippingCost.textContent);
-            const finalTotal = totalPrice + shipping;
-
-            let msg = `🛍️ **طلب جديد من Little Library** 💖\n\n`;
-            msg += `👤 **الاسم:** ${fullName}\n`;
-            msg += `📞 **التليفون:** ${phone}\n`;
-            if(altPhone) msg += `📞 **بديل:** ${altPhone}\n`;
-            msg += `📍 **المحافظة:** ${governorate}\n`;
-            msg += `🏠 **العنوان:** ${address}\n`;
-            if(email) msg += `📧 **الإيميل:** ${email}\n\n`;
-            msg += `📦 **المنتجات:**\n${productList}\n`;
-            msg += `🚚 **الشحن:** ${shipping} ج.م\n`;
-            msg += `💰 **الإجمالي النهائي:** ${finalTotal} ج.م\n\n`;
-            msg += `💳 **رقم المرسل:** ${senderNumber}`;
-
             try {
-                // تجهيز روابط صور المنتجات
-                let productImagesLinks = [];
-                if (cart.length > 0) {
-                    cart.forEach(item => {
-                        if (productImagesMap[item.name]) {
-                            let imgLink = productImagesMap[item.name];
-                            if (!imgLink.startsWith('http')) {
-                                imgLink = window.location.origin + '/' + imgLink;
-                            }
-                            productImagesLinks.push(imgLink);
-                        }
-                    });
-                }
-
                 const formData = new FormData();
-                formData.append('textMessage', encodeURIComponent(msg));
+                formData.append('customerData', encodeURIComponent(JSON.stringify(customerData)));
+                formData.append('cartItems', encodeURIComponent(JSON.stringify(cartItems)));
                 formData.append('photo', receiptFile);
                 formData.append('productImagesLinks', JSON.stringify(productImagesLinks));
 
@@ -528,7 +517,7 @@
                 const products = data.map(row => ({
                     id: row.product_id || '',
                     name: row.name || '',
-                    price: row.price || '0',
+                    price: row.real_price || '0',
                     category: row.category || '',
                     sub_category: row.sub_category || '',
                     imgs: row.imgs || '', 
@@ -619,7 +608,6 @@
                 
                 let imageSrc = p.imgs || '';
 
-                // تسريع الصور (تحويل الرابط لـ Base64)
                 if (imageSrc && (imageSrc.startsWith('http://') || imageSrc.startsWith('https://'))) {
                     try {
                         const response = await fetch(imageSrc);
@@ -651,14 +639,15 @@
 
                 let isAvailable = p.available.toLowerCase() === 'yes';
 
+                // عرض النصوص بشكل آمن (textContent)
                 html += `
                     <div class="product-card" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" data-available="${p.available}">
                         <div class="product-img-wrapper">
                             <img src="${imageSrc}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="placeholder-icon"><i class="fas fa-book-open"></i></div>
                         </div>
-                        <h4>${p.name}</h4>
-                        ${p.description ? `<div class="description">${p.description.replace(/\n/g, '<br>')}</div>` : ''}
+                        <h4></h4>
+                        <div class="description"></div>
                         <div class="price">${p.price} ج.م</div>
                         ${colorHtml}
                         <button class="btn-order add-to-cart ${!isAvailable ? 'sold-out' : ''}" ${!isAvailable ? 'disabled' : ''}>
@@ -668,6 +657,18 @@
                 `;
             }
             grid.innerHTML = html;
+            
+            // إضافة النصوص بشكل آمن
+            const cards = grid.querySelectorAll('.product-card');
+            cards.forEach((card, index) => {
+                const p = products[index];
+                card.querySelector('h4').textContent = p.name;
+                const descDiv = card.querySelector('.description');
+                if (p.description) {
+                    descDiv.textContent = p.description.replace(/\n/g, ' ');
+                }
+            });
+
             attachCartEvents();
         }
 
