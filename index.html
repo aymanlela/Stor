@@ -178,7 +178,6 @@
         <div class="container" id="accessories">
             <div class="category-header"><h3>أدوات و <span>ملحقات</span></h3><p>أقلام، استيكي نوت، وكل حاجة تكمل يومك الدراسي.</p></div>
             
-            <!-- الفلتر -->
             <div id="filter-container" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                 <button class="filter-btn active" data-filter="all" style="background: var(--brand-pink); color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold;">All</button>
             </div>
@@ -417,7 +416,7 @@
         function closeCartSidebar() { cartSidebar.classList.remove('open'); cartOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 
         // =====================================================
-        //  TELEGRAM SUBMIT
+        //  TELEGRAM SUBMIT (مع إرسال روابط صور المنتجات)
         // =====================================================
         orderForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -469,9 +468,24 @@
             msg += `💳 **رقم المرسل:** ${senderNumber}`;
 
             try {
+                // تجهيز روابط صور المنتجات
+                let productImagesLinks = [];
+                if (cart.length > 0) {
+                    cart.forEach(item => {
+                        if (productImagesMap[item.name]) {
+                            let imgLink = productImagesMap[item.name];
+                            if (!imgLink.startsWith('http')) {
+                                imgLink = window.location.origin + '/' + imgLink;
+                            }
+                            productImagesLinks.push(imgLink);
+                        }
+                    });
+                }
+
                 const formData = new FormData();
                 formData.append('textMessage', encodeURIComponent(msg));
                 formData.append('photo', receiptFile);
+                formData.append('productImagesLinks', JSON.stringify(productImagesLinks));
 
                 const response = await fetch('/api/send-order', {
                     method: 'POST',
@@ -499,7 +513,7 @@
         });
 
         // =====================================================
-        //  LOAD PRODUCTS & FILTERS (مع تسريع الصور)
+        //  LOAD PRODUCTS & FILTERS
         // =====================================================
         async function loadProducts() {
             document.querySelectorAll('.products-grid').forEach(grid => {
@@ -605,9 +619,7 @@
                 
                 let imageSrc = p.imgs || '';
 
-                // ==========================================
-                //  🔥 التعديل السحري لجلب الصور بسرعة
-                // ==========================================
+                // تسريع الصور (تحويل الرابط لـ Base64)
                 if (imageSrc && (imageSrc.startsWith('http://') || imageSrc.startsWith('https://'))) {
                     try {
                         const response = await fetch(imageSrc);
@@ -620,7 +632,6 @@
                             });
                         }
                     } catch (e) {
-                        // لو فشل التحميل، هنخلي الأيقونة تظهر
                         imageSrc = '';
                     }
                 }
