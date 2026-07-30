@@ -1,13 +1,10 @@
 export const config = {
   api: {
-    bodyParser: false, // مهم جداً عشان يقرا الملفات والصور
+    bodyParser: false,
   },
 };
 
 export default async function handler(req, res) {
-  // السماح بـ CORS عشان لو جاب أخطار
-  res.setHeader('Access-Control-Allow-Origin', '*');
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,18 +13,17 @@ export default async function handler(req, res) {
   const CHAT_ID = process.env.CHAT_ID;
 
   if (!BOT_TOKEN || !CHAT_ID) {
-    return res.status(500).json({ error: 'Bot Token or Chat ID missing in environment' });
+    return res.status(500).json({ error: 'Bot Token or Chat ID missing' });
   }
 
   try {
-    // 1. قراءة البيانات كـ Buffer
+    // 1. قراءة البيانات
     const chunks = [];
     for await (const chunk of req) {
       chunks.push(chunk);
     }
     const buffer = Buffer.concat(chunks);
 
-    // 2. استخراج الـ Boundary من الـ headers
     const contentType = req.headers['content-type'] || '';
     const boundary = `--${contentType.split('boundary=')[1]}`;
     const parts = buffer.toString('binary').split(boundary);
@@ -36,16 +32,15 @@ export default async function handler(req, res) {
     let receiptFileBuffer = null;
     let receiptFileName = 'receipt.jpg';
 
-    // 3. فك البيانات ومعالجة النص العربي
+    // 2. استخراج التفاصيل
     parts.forEach(part => {
       // استخراج النص (message)
       if (part.includes('Content-Disposition: form-data; name="message"')) {
-        // هنا التعديل السحري: نستخدم TextDecoder عشان يقرا العربي صح
         const raw = part.split('\r\n\r\n')[1];
         if (raw) {
-          // بنشيل الـ \r\n اللي في الآخر
+          // إزالة الـ newlines الزيادة
           const cleanRaw = raw.replace(/\r\n$/, '').trim();
-          // بنحول الـ Binary Buffer لـ نص UTF-8 (عربي)
+          // تحويل الباينري لعربي
           const bufferData = Buffer.from(cleanRaw, 'binary');
           textMessage = new TextDecoder('utf-8').decode(bufferData);
         }
@@ -62,7 +57,7 @@ export default async function handler(req, res) {
       }
     });
 
-    // 4. إرسال الرسالة النصية (التفاصيل) للتلجرام
+    // 3. إرسال التفاصيل للتلجرام
     if (textMessage) {
       const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
       await fetch(textUrl, {
@@ -75,19 +70,15 @@ export default async function handler(req, res) {
         })
       });
     } else {
-      // لو مفيش تفاصيل انبعثت، نبعث رسالة تأكيد عادية
-      const textUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-      await fetch(textUrl, {
+      // لو التفاصيل ضايعة لأي سبب (طوارئ)
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: "✅ تم استلام طلب جديد (التفاصيل غير متوفرة)."
-        })
+        body: JSON.stringify({ chat_id: CHAT_ID, text: "✅ طلب جديد (التفاصيل غير متوفرة)." })
       });
     }
 
-    // 5. إرسال صورة الإيصال (لو موجودة)
+    // 4. إرسال صورة الإيصال
     if (receiptFileBuffer) {
       const formData = new FormData();
       const blob = new Blob([receiptFileBuffer], { type: 'image/jpeg' });
@@ -102,7 +93,7 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ success: true, message: "Order received and sent!" });
+    return res.status(200).json({ success: true, message: "Order sent securely!" });
 
   } catch (error) {
     console.error("Server Error:", error);
