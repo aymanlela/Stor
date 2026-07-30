@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Little Library | With Love</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --brand-cream: #FBF5F0; --brand-brown: #5D3A2B; --brand-pink: #E8A8B5;
+            --brand-pink-hover: #d693a1; --white: #ffffff; --gray: #8B7D75;
+            --card-bg: #ffffff; --shadow: 0 12px 30px rgba(93, 58, 43, 0.08);
+            --transition: all 0.3s ease; --navbar-height: 80px;
+        }
+        html { scroll-padding-top: 130px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background: var(--brand-cream); color: var(--brand-brown); line-height: 1.6; padding-top: var(--navbar-height); }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 25px; }
+
+        /* Navbar */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; background: rgba(251, 245, 240, 0.95); padding: 15px 0; border-bottom: 1px solid rgba(93, 58, 43, 0.06); z-index: 9999; backdrop-filter: blur(12px); box-shadow: 0 2px 20px rgba(93, 58, 43, 0.04); transition: var(--transition); height: var(--navbar-height); display: flex; align-items: center; }
+        .navbar.scrolled { padding: 10px 0; background: rgba(251, 245, 240, 0.98); border-bottom: 1px solid rgba(93, 58, 43, 0.1); --navbar-height: 65px; }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .logo-wrapper { display: flex; align-items: center; gap: 15px; }
+        .logo-text h1 { font-size: 1.8rem; font-weight: 900; letter-spacing: 1px; color: var(--brand-brown); transition: var(--transition); }
+        .navbar.scrolled .logo-text h1 { font-size: 1.5rem; }
+        .logo-text h1 span { color: var(--brand-pink); }
+        .logo-text small { display: block; font-size: 0.65rem; letter-spacing: 4px; color: var(--gray); margin-top: -5px; transition: var(--transition); }
+        .navbar.scrolled .logo-text small { font-size: 0.55rem; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { color: var(--gray); font-weight: 600; transition: var(--transition); font-size: 1rem; padding: 8px 16px; border-radius: 30px; }
+        .nav-links a:hover { color: var(--brand-pink); background: rgba(232, 168, 181, 0.1); }
+
+        /* Icons */
+        .float-icons { position: fixed; bottom: 30px; left: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 9998; }
+        .float-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; transition: var(--transition); cursor: pointer; border: none; box-shadow: 0 5px 20px rgba(93, 58, 43, 0.1); position: relative;}
+        .float-btn:hover { transform: scale(1.08) translateY(-3px); }
+        .float-btn.whatsapp { background: #25d366; color: white; }
+        .float-btn.cart { background: var(--brand-pink); color: white; }
+        .float-btn .badge { position: absolute; top: -5px; right: -5px; background: #ff6b6b; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+        /* Hero */
+        .hero { padding: 60px 0 50px; background: radial-gradient(ellipse at 70% 30%, #fff7f2, var(--brand-cream) 70%); text-align: center; position: relative; }
+        .hero-text h2 { font-size: 3.8rem; font-weight: 900; line-height: 1.2; color: var(--brand-brown); margin-bottom: 5px; }
+        .hero-text h2 span { color: var(--brand-pink); }
+        .hero-text .slogan-primary { font-size: 1.8rem; font-weight: 700; color: var(--brand-brown); letter-spacing: 1px; margin: 5px 0; }
+        .hero-text .slogan-primary span { color: var(--brand-pink); }
+        .hero-text .slogan-secondary { font-size: 1.2rem; color: var(--gray); margin: -5px 0 25px 0; }
+        
+        .hero-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 10px 0 25px; }
+        .btn-pink { background: var(--brand-pink); color: white; padding: 16px 45px; border-radius: 50px; font-weight: 700; font-size: 1.2rem; display: inline-block; transition: var(--transition); box-shadow: 0 5px 20px rgba(232, 168, 181, 0.3); border: none; cursor: pointer;}
+        .btn-pink:hover { background: var(--brand-pink-hover); transform: translateY(-4px); box-shadow: 0 8px 25px rgba(232, 168, 181, 0.4); }
+        .btn-outline-pink { background: transparent; color: var(--brand-brown); padding: 16px 45px; border-radius: 50px; font-weight: 700; font-size: 1.2rem; display: inline-block; transition: var(--transition); border: 2px solid var(--brand-pink); cursor: pointer; }
+        .btn-outline-pink:hover { background: var(--brand-pink); color: white; transform: translateY(-4px); box-shadow: 0 8px 25px rgba(232, 168, 181, 0.4); }
+        .hero-badges { display: flex; gap: 20px; margin-top: 15px; justify-content: center; flex-wrap: wrap; }
+
+        /* Products */
+        .category-header { text-align: center; margin: 55px 0 30px; padding: 25px 35px; background: #ffffff; border-radius: 20px; border: 2px dashed var(--brand-pink); box-shadow: var(--shadow); scroll-margin-top: 130px; position: relative; }
+        .category-header::before { content: '📚'; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--brand-cream); padding: 0 15px; font-size: 1.5rem; }
+        .category-header h3 { font-size: 2.2rem; font-weight: 800; color: var(--brand-brown); }
+        .category-header h3 span { color: var(--brand-pink); }
+        .category-header p { color: var(--gray); font-size: 1.1rem; margin-top: 8px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 35px; margin: 30px 0 10px; }
+        .product-card { background: #ffffff; border-radius: 25px; padding: 20px 15px; text-align: center; border: 1px solid rgba(93, 58, 43, 0.04); transition: var(--transition); box-shadow: var(--shadow); position: relative; }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--brand-pink); box-shadow: 0 15px 40px rgba(232, 168, 181, 0.15); }
+        
+        .product-img-wrapper { background: var(--brand-cream); height: 220px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; overflow: hidden; border: 1px solid rgba(93, 58, 43, 0.03); position: relative; }
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .product-img-wrapper .placeholder-icon { font-size: 4.5rem; color: var(--brand-pink); opacity: 0.4; display: none; }
+        
+        .product-card h4 { font-size: 1.2rem; color: var(--brand-brown); margin: 10px 0 5px; }
+        .product-card .description { font-size: 0.9rem; color: var(--gray); margin: 8px 0 12px; line-height: 1.5; }
+        .product-card .price { color: var(--brand-pink); font-size: 1.4rem; font-weight: 700; }
+        
+        .color-select-wrapper { margin: 15px 0; text-align: center; }
+        .color-select-wrapper select { padding: 8px 15px; border-radius: 30px; border: 1px solid #ddd; background: var(--brand-cream); color: var(--brand-brown); font-family: 'Cairo', sans-serif; width: 100%; max-width: 200px; outline: none; cursor: pointer; transition: 0.3s; }
+        .color-select-wrapper select:focus { border-color: var(--brand-pink); box-shadow: 0 0 0 3px rgba(232, 168, 181, 0.2); }
+        
+        .btn-order { background: var(--brand-pink); color: white; border: none; padding: 12px 25px; border-radius: 40px; font-weight: 700; transition: var(--transition); cursor: pointer; width: 100%; margin-top: 10px; font-size: 1rem; }
+        .btn-order:hover:not(:disabled) { background: var(--brand-pink-hover); transform: translateY(-2px); }
+        .btn-order.added { background: #2d8f4e; }
+        .btn-order.sold-out { background: #e0d6d0; color: #a39a93; cursor: not-allowed; }
+
+        /* Cart */
+        .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(93, 58, 43, 0.5); z-index: 10000; display: none; backdrop-filter: blur(4px); }
+        .cart-overlay.active { display: block; }
+        .cart-sidebar { position: fixed; top: 0; left: -420px; width: 400px; max-width: 90%; height: 100%; background: #ffffff; z-index: 10001; transition: left 0.4s ease; padding: 25px 20px; overflow-y: auto; box-shadow: -10px 0 30px rgba(93, 58, 43, 0.1); }
+        .cart-sidebar.open { left: 0; }
+        .cart-sidebar .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(93, 58, 43, 0.1); padding-bottom: 15px; margin-bottom: 20px; }
+        .cart-sidebar .cart-header h3 { color: var(--brand-pink); }
+        .cart-sidebar .cart-header .close-cart { background: none; border: none; color: var(--gray); font-size: 1.8rem; cursor: pointer; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(93, 58, 43, 0.05); }
+        .cart-item .item-name { font-weight: 600; color: var(--brand-brown); }
+        .cart-item .item-price { color: var(--brand-pink); }
+        .cart-total { padding: 20px 0; border-top: 2px solid rgba(232, 168, 181, 0.2); margin-top: 10px; }
+        .cart-total .total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; color: var(--brand-brown); padding: 5px 0; }
+        .cart-total .total-row span:last-child { font-weight: 700; }
+        .cart-total .total-row.final { border-top: 1px dashed var(--brand-pink); padding-top: 10px; margin-top: 5px; font-size: 1.3rem; }
+        .cart-total .total-row.final span:last-child { color: var(--brand-pink); }
+        
+        #checkoutFormContainer { border-top: 1px solid rgba(93,58,43,0.1); padding-top: 15px; }
+        #checkoutFormContainer h4 { color: var(--brand-brown); text-align: center; margin-bottom: 15px; }
+        #orderForm { display: flex; flex-direction: column; gap: 12px; }
+        #orderForm input, #orderForm select, #orderForm textarea { padding: 10px; border-radius: 10px; border: 1px solid #ddd; background: var(--brand-cream); font-family: 'Cairo', sans-serif; width: 100%; outline: none; transition: 0.3s; }
+        #orderForm input:focus, #orderForm select:focus, #orderForm textarea:focus { border-color: var(--brand-pink); box-shadow: 0 0 0 3px rgba(232, 168, 181, 0.2); }
+        #orderForm textarea { height: 60px; resize: none; }
+
+        .upload-box { border: 2px dashed var(--brand-pink); border-radius: 10px; padding: 15px; text-align: center; background: #fff; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { background: #fdfaf8; border-color: var(--brand-brown); }
+        .upload-box i { font-size: 1.5rem; display: block; margin-bottom: 5px; color: var(--brand-pink); }
+        #fileNameDisplay { font-size: 0.8rem; color: var(--gray); display: block; margin-top: 5px; }
+        .btn-submit-order { background: var(--brand-pink); color: white; border: none; padding: 12px; border-radius: 40px; font-weight: 700; transition: var(--transition); cursor: pointer; width: 100%; margin-top: 10px; font-size: 1.1rem; }
+        .btn-submit-order:hover { background: var(--brand-pink-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(232, 168, 181, 0.4); }
+        .btn-submit-order:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Footer */
+        .footer { background: #ffffff; padding: 50px 0 25px; margin-top: 70px; border-top: 1px solid rgba(93, 58, 43, 0.05); }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center; }
+        .footer-col h4 { color: var(--brand-brown); font-size: 1.4rem; margin-bottom: 15px; }
+        .footer-col a { color: var(--gray); display: block; margin-bottom: 10px; transition: var(--transition); }
+        .footer-col a:hover { color: var(--brand-pink); }
+        .social-icons { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .social-icons a { font-size: 2rem; display: inline-block; margin: 0; }
+        .footer-bottom { text-align: center; padding-top: 30px; margin-top: 30px; border-top: 1px solid rgba(93, 58, 43, 0.05); color: var(--gray); }
+
+        @media (max-width: 992px) { .nav-links { display: none; } .hero-text h2 { font-size: 2.8rem; } .hero-text .slogan-primary { font-size: 1.5rem; } }
+        @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr 1fr; gap: 15px; } .hero-text h2 { font-size: 2.2rem; } .hero-text .slogan-primary { font-size: 1.2rem; } .category-header h3 { font-size: 1.6rem; } .cart-sidebar { width: 100%; max-width: 100%; left: -100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="float-icons">
+        <button class="float-btn cart" id="cartFloatBtn"><i class="fas fa-shopping-bag"></i><span class="badge" id="cartBadge">0</span></button>
+        <a href="https://wa.me/201553030888" target="_blank" class="float-btn whatsapp"><i class="fab fa-whatsapp"></i></a>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="logo-wrapper">
+                <div class="logo-text"><h1>Little <span>Library</span></h1><small>WITH LOVE</small></div>
+            </div>
+            <div class="nav-links">
+                <a href="#home">الرئيسية</a>
+                <a href="#study-boxes">البوكسات</a>
+                <a href="#accessories">الملحقات</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-text">
+                <h2>Little <span>Library</span></h2>
+                
+                <div class="slogan-primary">Fly with <span>cute vibes</span></div>
+                <div class="slogan-secondary">✨ كل تفصيلة بحب ✨</div>
+                
+                <div class="hero-buttons">
+                    <a href="#study-boxes" class="btn-pink">شوف بوكساتنا <i class="fas fa-arrow-left"></i></a>
+                    <a href="#accessories" class="btn-outline-pink">جهز أدواتك ✏️</a>
+                </div>
+
+                <div class="hero-badges">
+                    <span class="badge-link"><i class="fas fa-check-circle" style="color:var(--brand-pink);"></i> خامات ممتازة</span>
+                    <span class="badge-link"><i class="fas fa-gem" style="color:var(--brand-pink);"></i> تصميم شيك</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="products-container">
+        <div class="container" id="study-boxes">
+            <div class="category-header"><h3>بوكسات <span>المذاكرة</span></h3><p>باكدج متكامل لكل مرحلة دراسية، جاهز ليك!</p></div>
+            <div class="products-grid" id="study-boxes-grid"></div>
+        </div>
+        <div class="container" id="accessories">
+            <div class="category-header"><h3>أدوات و <span>ملحقات</span></h3><p>أقلام، استيكي نوت، وكل حاجة تكمل يومك الدراسي.</p></div>
+            <div class="products-grid" id="accessories-grid"></div>
+        </div>
+    </div>
+
+    <!-- ========== CART & CHECKOUT ========== -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>🛍️ سلة المشتريات</h3>
+            <button class="close-cart" id="closeCart">✕</button>
+        </div>
+        
+        <div id="cartItems" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+            <div class="cart-empty" style="text-align:center;color:var(--gray);padding:30px;">السلة فاضية 🛒</div>
+        </div>
+        
+        <div class="cart-total" id="cartTotal" style="display:none; padding-top: 0; border-top: none;">
+            <div class="total-row"><span>إجمالي المنتجات:</span><span id="subTotalPrice">٠ ج.م</span></div>
+            <div class="total-row" style="font-size: 1rem; color: var(--gray);"><span>تكلفة الشحن:</span><span id="shippingCost">٠ ج.م</span></div>
+            <div class="total-row final"><span>الإجمالي النهائي:</span><span id="finalTotalPrice">٠ ج.م</span></div>
+        </div>
+
+        <div id="checkoutFormContainer" style="display:none; border-top: 1px solid rgba(93,58,43,0.1); padding-top: 15px;">
+            <h4>يرجى إدخال بياناتك لإكمال الطلب 📝</h4>
+            <form id="orderForm">
+                <input type="text" id="fullName" placeholder="الاسم بالكامل *" required>
+                <input type="tel" id="phoneNumber" placeholder="رقم التليفون *" required>
+                
+                <select id="governorate" required>
+                    <option value="">-- اختر المحافظة --</option>
+                    <option value="القاهرة" data-shipping="40">القاهرة (40 ج.م)</option>
+                    <option value="الجيزة" data-shipping="40">الجيزة (40 ج.م)</option>
+                    <option value="الإسكندرية" data-shipping="45">الإسكندرية (45 ج.م)</option>
+                    <option value="الدقهلية" data-shipping="50">الدقهلية (50 ج.م)</option>
+                    <option value="الشرقية" data-shipping="50">الشرقية (50 ج.م)</option>
+                    <option value="الغربية" data-shipping="50">الغربية (50 ج.م)</option>
+                    <option value="المنوفية" data-shipping="50">المنوفية (50 ج.م)</option>
+                    <option value="البحيرة" data-shipping="50">البحيرة (50 ج.م)</option>
+                    <option value="كفر الشيخ" data-shipping="55">كفر الشيخ (55 ج.م)</option>
+                    <option value="دمياط" data-shipping="55">دمياط (55 ج.م)</option>
+                    <option value="بورسعيد" data-shipping="55">بورسعيد (55 ج.م)</option>
+                    <option value="السويس" data-shipping="55">السويس (55 ج.م)</option>
+                    <option value="شمال سيناء" data-shipping="60">شمال سيناء (60 ج.م)</option>
+                    <option value="جنوب سيناء" data-shipping="60">جنوب سيناء (60 ج.م)</option>
+                    <option value="مطروح" data-shipping="60">مطروح (60 ج.م)</option>
+                    <option value="الوادي الجديد" data-shipping="65">الوادي الجديد (65 ج.м)</option>
+                    <option value="قنا" data-shipping="65">قنا (65 ج.م)</option>
+                    <option value="سوهاج" data-shipping="65">سوهاج (65 ج.م)</option>
+                    <option value="الأقصر" data-shipping="65">الأقصر (65 ج.م)</option>
+                    <option value="أسوان" data-shipping="65">أسوان (65 ج.م)</option>
+                    <option value="المنيا" data-shipping="60">المنيا (60 ج.م)</option>
+                    <option value="أسيوط" data-shipping="60">أسيوط (60 ج.م)</option>
+                    <option value="بني سويف" data-shipping="55">بني سويف (55 ج.م)</option>
+                    <option value="الفيوم" data-shipping="55">الفيوم (55 ج.م)</option>
+                    <option value="البحر الأحمر" data-shipping="65">البحر الأحمر (65 ج.م)</option>
+                </select>
+
+                <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)">
+                <textarea id="addressDetails" placeholder="العنوان بالتفصيل (الشارع، العمارة، الدور) *" required></textarea>
+                <input type="tel" id="altPhone" placeholder="رقم تليفون بديل (اختياري)">
+
+                <div style="text-align: center; margin-top: 10px;">
+                    <p style="font-size: 0.9rem; color: var(--gray);">💳 يمكنك الدفع عبر فودافون كاش:</p>
+                    <!-- ⚠️ غير اسم الصورة ورقم المحفظة هنا -->
+                    <img src="vodafone-cash.jpg" alt="أرقام فودافون كاش" style="width: 100%; max-width: 200px; border-radius: 10px; margin: 10px auto; display: block; border: 1px solid #ddd;">
+                    <p style="font-weight: bold; color: var(--brand-brown);">رقم المحفظة: <span style="color: var(--brand-pink);">01012345678</span></p> 
+                </div>
+                
+                <input type="text" id="senderNumber" placeholder="رقم أو حساب المرسل *" required>
+
+                <!-- خلية رفع الصورة رجعت عشان العميل يرفع إيصال الدفع -->
+                <div class="upload-box" onclick="document.getElementById('receiptUpload').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <label style="cursor: pointer; color: var(--brand-brown); font-weight: 600;">اضغط لرفع صورة التحويل (إلزامي)</label>
+                    <input type="file" id="receiptUpload" accept="image/*" style="display: none;" onchange="document.getElementById('fileNameDisplay').textContent = this.files[0].name">
+                    <span id="fileNameDisplay">لم يتم رفع صورة</span>
+                </div>
+
+                <button type="submit" id="submitOrderBtn" class="btn-submit-order" style="margin-top:5px;">إتمام الطلب 📦</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4>Little Library</h4>
+                <p><i class="fas fa-book-open"></i> كل حاجة لدراستك بمكان</p>
+                <p><i class="fas fa-phone-alt"></i> 01553030888</p>
+            </div>
+            <div class="footer-col">
+                <h4>تابعنا عالسوشيال</h4>
+                <div class="social-icons">
+                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/201553030888" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; 2026 Little Library - Fly with cute vibes ✨</div>
+    </footer>
+
+    <script>
+        // =====================================================
+        //  CONFIG
+        // =====================================================
+        const SHEET_ID = '1B9EnRkQt-C0cjSiKasBR8KN47UPpoEhaANAU-EJiHfc';
+        const TAB_NAME = 'Sheet1';
+        const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${TAB_NAME}`;
+        
+        // (تم حذف التوكن من هنا تماماً، أصبح آمن)
+
+        // =====================================================
+        //  CART LOGIC
+        // =====================================================
+        let cart = [];
+        let productImagesMap = {}; 
+
+        const cartBadge = document.getElementById('cartBadge');
+        const cartFloatBtn = document.getElementById('cartFloatBtn');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const closeCart = document.getElementById('closeCart');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const subTotalPrice = document.getElementById('subTotalPrice');
+        const shippingCost = document.getElementById('shippingCost');
+        const finalTotalPrice = document.getElementById('finalTotalPrice');
+        const checkoutFormContainer = document.getElementById('checkoutFormContainer');
+        
+        const orderForm = document.getElementById('orderForm');
+        const governorateSelect = document.getElementById('governorate');
+        const submitBtn = document.getElementById('submitOrderBtn');
+
+        function attachCartEvents() {
+            document.querySelectorAll('.add-to-cart:not(.sold-out)').forEach(button => {
+                button.removeEventListener('click', handleAddToCart);
+                button.addEventListener('click', handleAddToCart);
+            });
+        }
+
+        function handleAddToCart(e) {
+            e.preventDefault();
+            const btn = e.currentTarget;
+            const card = btn.closest('.product-card');
+            if (!card) return;
+
+            const name = card.dataset.name;
+            const price = parseInt(card.dataset.price);
+            const available = card.dataset.available;
+            if (available === 'no') return;
+
+            let selectedColor = '';
+            const colorSelect = card.querySelector('.color-select');
+            if (colorSelect) {
+                selectedColor = colorSelect.value;
+                if (!selectedColor) {
+                    showNotification('⚠️ من فضلك اختر خياراً من القائمة');
+                    return;
+                }
+            }
+
+            const existingItem = cart.find(item => item.name === name && item.color === selectedColor);
+            if (existingItem) existingItem.quantity += 1;
+            else cart.push({ name, price, quantity: 1, color: selectedColor });
+
+            updateCart();
+            showNotification(`✅ تم إضافة "${name}" للسلة`);
+            btn.textContent = '✅ تم الإضافة';
+            btn.classList.add('added');
+            setTimeout(() => { btn.textContent = '🛒 أضف للسلة'; btn.classList.remove('added'); }, 2000);
+        }
+
+        function updateCart() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartBadge.textContent = totalItems;
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="cart-empty" style="text-align:center;color:var(--gray);padding:30px;">السلة فاضية 🛒</div>';
+                cartTotal.style.display = 'none';
+                checkoutFormContainer.style.display = 'none';
+                return;
+            }
+
+            let html = ''; let total = 0;
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <span class="item-name">${item.name}</span>
+                            <span style="color:var(--gray);font-size:0.9rem;">📌 ${item.color || 'بدون خيار'}</span>
+                            <span class="item-price">${item.price} ج.م × ${item.quantity} = ${itemTotal} ج.م</span>
+                        </div>
+                        <button class="remove-item" data-index="${index}" style="background:none;border:none;color:#ff6b6b;cursor:pointer;"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+            });
+            cartItems.innerHTML = html;
+            cartTotal.style.display = 'block';
+            checkoutFormContainer.style.display = 'block';
+            subTotalPrice.textContent = `${total} ج.م`;
+            calculateShipping();
+
+            document.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    cart.splice(parseInt(this.dataset.index), 1);
+                    updateCart();
+                    showNotification('🗑️ تم حذف المنتج');
+                });
+            });
+        }
+
+        function calculateShipping() {
+            const selected = governorateSelect.options[governorateSelect.selectedIndex];
+            let shipping = 0;
+            if(selected && selected.dataset.shipping) {
+                shipping = parseInt(selected.dataset.shipping);
+            }
+            shippingCost.textContent = `${shipping} ج.م`;
+            
+            let subTotal = 0;
+            cart.forEach(item => { subTotal += item.price * item.quantity; });
+            finalTotalPrice.textContent = `${subTotal + shipping} ج.م`;
+        }
+
+        governorateSelect.addEventListener('change', calculateShipping);
+
+        cartFloatBtn.addEventListener('click', () => { cartSidebar.classList.add('open'); cartOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; });
+        closeCart.addEventListener('click', closeCartSidebar);
+        cartOverlay.addEventListener('click', closeCartSidebar);
+        function closeCartSidebar() { cartSidebar.classList.remove('open'); cartOverlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+        // =====================================================
+        //  TELEGRAM SUBMIT (الفرق هنا: بيبعث للسيرفر الوسيط بتاعي)
+        // =====================================================
+        orderForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري إرسال الطلب... ⏳';
+
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phoneNumber').value;
+            const governorate = document.getElementById('governorate').value;
+            const email = document.getElementById('email').value;
+            const address = document.getElementById('addressDetails').value;
+            const altPhone = document.getElementById('altPhone').value;
+            const senderNumber = document.getElementById('senderNumber').value;
+            const receiptFile = document.getElementById('receiptUpload').files[0];
+
+            if(!governorate) {
+                showNotification('⚠️ من فضلك اختر المحافظة');
+                submitBtn.disabled = false; submitBtn.textContent = 'إتمام الطلب 📦';
+                return;
+            }
+            
+            if(!receiptFile) {
+                showNotification('⚠️ من فضلك ارفع صورة التحويل أولاً');
+                submitBtn.disabled = false; submitBtn.textContent = 'إتمام الطلب 📦';
+                return;
+            }
+
+            let productList = '';
+            let totalPrice = 0;
+            let firstProductImage = ''; 
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+                productList += `📦 ${item.name} (x${item.quantity}) - ${item.color || 'بدون خيار'} = ${itemTotal} ج.م\n`;
+                
+                if(index === 0 && productImagesMap[item.name]) {
+                    firstProductImage = productImagesMap[item.name];
+                }
+            });
+
+            const shipping = parseInt(shippingCost.textContent);
+            const finalTotal = totalPrice + shipping;
+
+            let msg = `🛍️ **طلب جديد من Little Library** 💖\n\n`;
+            msg += `👤 **الاسم:** ${fullName}\n`;
+            msg += `📞 **التليفون:** ${phone}\n`;
+            if(altPhone) msg += `📞 **بديل:** ${altPhone}\n`;
+            msg += `📍 **المحافظة:** ${governorate}\n`;
+            msg += `🏠 **العنوان:** ${address}\n`;
+            if(email) msg += `📧 **الإيميل:** ${email}\n\n`;
+            msg += `📦 **المنتجات:**\n${productList}\n`;
+            msg += `🚚 **الشحن:** ${shipping} ج.م\n`;
+            msg += `💰 **الإجمالي النهائي:** ${finalTotal} ج.م\n\n`;
+            msg += `💳 **رقم المرسل:** ${senderNumber}`;
+
+            try {
+                // 1. تجهيز البيانات للإرسال للسيرفر الوسيط
+                const formData = new FormData();
+                formData.append('message', msg); // النص
+                formData.append('photo', receiptFile); // صورة الإيصال
+
+                // لو عايز نبعت صورة المنتج برضه للسيرفر (اختياري)
+                if (firstProductImage) {
+                     formData.append('productImageUrl', firstProductImage);
+                }
+
+                // ==============================================
+                // ✅ التغيير الأهم: بعت البيانات للسيرفر الوسيط بتاعي مش لـ Telegram
+                // ==============================================
+                const response = await fetch('/api/send-order', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل إرسال الطلب للسيرفر');
+                }
+
+                showNotification('✅ تم إرسال طلبك بنجاح! سنتواصل معك قريباً.');
+                cart = [];
+                updateCart();
+                closeCartSidebar();
+                orderForm.reset();
+                document.getElementById('fileNameDisplay').textContent = 'لم يتم رفع صورة';
+
+            } catch (error) {
+                console.error(error);
+                showNotification('❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'إتمام الطلب 📦';
+            }
+        });
+
+        // =====================================================
+        //  LOAD PRODUCTS
+        // =====================================================
+        async function loadProducts() {
+            document.querySelectorAll('.products-grid').forEach(grid => {
+                grid.innerHTML = `<div class="loading" style="grid-column:1/-1;text-align:center;color:var(--gray);"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>`;
+            });
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('فشل الاتصال');
+                const data = await response.json();
+
+                const products = data.map(row => ({
+                    id: row.product_id || '',
+                    name: row.name || '',
+                    price: row.price || '0',
+                    category: row.category || '',
+                    imgs: row.imgs || '', 
+                    color: row.color || '',
+                    description: row.description || '',
+                    available: row.available || 'no'
+                })).filter(p => p.id && p.name);
+
+                products.forEach(p => {
+                    if(p.imgs) productImagesMap[p.name] = p.imgs;
+                });
+
+                renderProducts('study-boxes-grid', products.filter(p => p.category === 'study-boxes'));
+                renderProducts('accessories-grid', products.filter(p => p.category === 'accessories'));
+
+            } catch (error) {
+                console.error(error);
+                document.querySelectorAll('.products-grid').forEach(grid => {
+                    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ff6b6b;padding:40px;">عذراً، حدث خطأ في تحميل المنتجات. تأكد من الجدول.</div>`;
+                });
+            }
+        }
+
+        function renderProducts(gridId, products) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+            if (products.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--gray);padding:30px;">لا توجد منتجات في هذا القسم حالياً 🛒</div>`;
+                return;
+            }
+
+            let html = '';
+            products.forEach(p => {
+                
+                let imageSrc = p.imgs || '';
+                
+                let colorHtml = '';
+                if (p.color && p.color.trim() !== '') {
+                    const colors = p.color.split(',').map(c => c.trim());
+                    colorHtml = `
+                        <div class="color-select-wrapper">
+                            <select class="color-select">
+                                <option value="">-- اختر الخيار --</option>
+                                ${colors.map(c => `<option value="${c}">${c}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+
+                let isAvailable = p.available.toLowerCase() === 'yes';
+
+                html += `
+                    <div class="product-card" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" data-available="${p.available}">
+                        <div class="product-img-wrapper">
+                            <img src="${imageSrc}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="placeholder-icon"><i class="fas fa-book-open"></i></div>
+                        </div>
+                        <h4>${p.name}</h4>
+                        ${p.description ? `<div class="description">${p.description.replace(/\n/g, '<br>')}</div>` : ''}
+                        <div class="price">${p.price} ج.م</div>
+                        ${colorHtml}
+                        <button class="btn-order add-to-cart ${!isAvailable ? 'sold-out' : ''}" ${!isAvailable ? 'disabled' : ''}>
+                            ${isAvailable ? '🛒 أضف للسلة' : '❌ غير متوفر'}
+                        </button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+            attachCartEvents();
+        }
+
+        function showNotification(text) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#ffffff;color:#5D3A2B;padding:12px 25px;border-radius:50px;font-weight:600;box-shadow:0 10px 30px rgba(93,58,43,0.1);z-index:99999;border:1px solid #E8A8B5;text-align:center;max-width:90%;`;
+            notif.textContent = text;
+            document.body.appendChild(notif);
+            setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 3500);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>
